@@ -17,68 +17,46 @@ sequenceDiagram
 
 ## Client Callback
 
-`/GET /#/auth/callback?status={status}&reason={reason}`
+`/GET /#/auth/callback?code={discord_auth_code}`
 
-`status` может быть:
-
-* `success`
-  В этом случае `reason` не нужен
-* `failed`
-  В этом случае нужно указать `reason` в типе `string`. Формат записи произвольный. Все равно неизвестно, что в таких случаях делать, поэтому пользователя заставляем повторно проходить авторизацию через кнопошку.
+Клиент загружается и переправляет `discord_auth_code` на [сервер](#api-callback).
 
 ## API Callback
 
-`GET /api/discord/callback?code={discord_code}`
+`GET /api/discord/callback?code=$DISCORD_AUTH_CODE`
 
-Запрос возвращает 302 status code с пустым телом в любом случае.
+* results
+  * `200` в случае успеха
+    * content
+      * `text/plain`
+      * `$AUTH_TOKEN`
+  А в теле оставил только один голый `$AUTH_TOKEN`.
 
-В случае удачи в ответе содержатся такие заголовки:
+Если так подумать, ошибки должны делиться на две категории: критические
+
+Т.е. ответ выглядит так:
 
 ```bash
-Location: $CLIENT_CALLBACK_ENDPOINT?status=success
-Set-Cookie: laravel_session=23434sdfsdgery; expires=Sat, 18 May 2024 06:06:11 GMT; Max-Age=7200; path=/; httponly; samesite=lax
+Content-Type: text/plain
+
+$AUTH_TOKEN
 ```
 
-В случае неудачи — такие:
+В случае неудачи достаточно возвращать `401 Unauthorized` с каким-то телом, но я до сих пор не знаю, какой нужен для этого формат.
 
-```bash
-Location: $CLIENT_CALLBACK_ENDPOINT?status=failed&reason=$ERROR_MESSAGE
+В каждый запрос (который требует авторизации) клиент добавляет заголовок `Authorization: Bearer $AUTH_TOKEN`, а север его извлекает, идентифицирует по нему пользователя и отдает нужные данные.
+
+К примеру, на запрос:
+
+```text
+GET /api/discord/get-user-data
+Authorization: Bearer $AUTH_TOKEN
 ```
 
-* `CLIENT_CALLBACK_ENDPOINT` выглядит примерно так: `http://localhost:5173/#/auth/callback` (в случае локального запуска через Vite)
-* В `ERROR_MESSAGE` записывается, что пошло не так во время выполнения запроса. Формат произвольный.
+Сервер возвращает:
 
-На языке [OpenAPI](https://www.openapis.org/) это выглядит так:
+```json
+Content-Type: application/json
 
-```yml
-/api/discord/callback:
-  parameters:
-    - in: query
-      name: code
-      schema:
-        type: string
-      required: true
-  get:
-    responses:
-      "302":
-        description: Found
-        headers:
-          Location:
-            schema:
-              type: string
-              example: http://localhost:5173/#/auth/callback?status=success
-            examples:
-              success:
-                value: http://localhost:5173/#/auth/callback?status=success
-              failed:
-                value: http://localhost:5173/#/auth/callback?status=failed&reason=Code_error
-          Set-Cookie:
-            schema:
-              type: string
-              example: laravel_session=23434sdfsdgery; expires=Sat, 18 May 2024 06:06:11 GMT; Max-Age=7200; path=/; httponly; samesite=lax
-            examples:
-              success:
-                value: laravel_session=23434sdfsdgery; expires=Sat, 18 May 2024 06:06:11 GMT; Max-Age=7200; path=/; httponly; samesite=lax
-              failed:
-                value:
+{"id":42,"nickname":"foobar"}
 ```
