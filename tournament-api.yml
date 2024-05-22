@@ -1,0 +1,68 @@
+openapi: '3.0.2'
+info:
+  title: Tournament API
+  version: '1.0'
+servers:
+  - url: http://127.0.0.1:4010
+    description: Local prism
+  - url: http://127.0.0.1:8000
+    description: Local server Tournament.Api
+paths:
+  /api/discord/callback:
+    parameters:
+      - in: query
+        name: code
+        schema:
+          type: string
+        required: true
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              example: "my-auth-token"
+        '401':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+                additionalProperties: false
+                required:
+                  - error
+                  - message
+  /api/discord/get-user-data:
+    get:
+      responses:
+        '200':
+          description: OK
+  /api/home:
+    get:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _token:
+                    type: string
+                additionalProperties: false
+                required:
+                  - _token
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                default: no-cache, private
+            Set-Cookie:
+              schema:
+                type: string
+                example: laravel_session=2345dfg34sdg; expires=Fri, 17 May 2024 16:24:38 GMT; Max-Age=7200; path=/; httponly; samesite=lax
