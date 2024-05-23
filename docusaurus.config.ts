@@ -45,6 +45,7 @@ const config: Config = {
           editUrl:
             'https://github.com/funnysockorg/Tournament.Docs/edit/main/',
           remarkPlugins: [remarkBreaks],
+          docItemComponent: "@theme/ApiItem" // derived from docusaurus-theme-openapi-docs
         },
         blog: {
           showReadingTime: true,
@@ -61,7 +62,32 @@ const config: Config = {
     ],
   ],
 
-  themes: ['@docusaurus/theme-mermaid'],
+  plugins: [
+    [
+      "docusaurus-plugin-openapi-docs",
+      {
+        id: "openapi",
+        docsPluginId: "classic",
+        config: {
+          petstore: {
+            specPath: "api/api-spec.yaml",
+            outputDir: "docs/api",
+            downloadUrl:
+              "https://raw.githubusercontent.com/PaloAltoNetworks/docusaurus-template-openapi-docs/main/examples/petstore.yaml",
+            sidebarOptions: {
+              groupPathsBy: "tag",
+              categoryLinkSource: "tag",
+            },
+          },
+        },
+      },
+    ],
+  ],
+
+  themes: [
+    '@docusaurus/theme-mermaid',
+    'docusaurus-theme-openapi-docs'
+  ],
 
   markdown: {
     mermaid: true,
@@ -82,6 +108,12 @@ const config: Config = {
           sidebarId: 'docsSidebar',
           position: 'left',
           label: 'Docs',
+        },
+        {
+          type: 'docSidebar',
+          sidebarId: 'openApiSidebar',
+          position: 'left',
+          label: 'API',
         },
         {
           href: 'https://github.com/funnysockorg',
