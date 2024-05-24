@@ -17,7 +17,9 @@
     "gen-api-docs-all": "npm run gen-api-docs -- all",
     "clean-api-docs": "docusaurus clean-api-docs",
     "gen-api-docs:version": "docusaurus gen-api-docs:version",
-    "clean-api-docs:version": "docusaurus clean-api-docs:version"
+    "clean-api-docs:version": "docusaurus clean-api-docs:version",
+    "jsight:convert": "jsight -s convert openapi yaml api/api-spec.jst > api/api-spec.yaml",
+    "prism:serve": "prism mock api/api-spec.yaml"
   },
   "dependencies": {
     "@docusaurus/core": "^3.2.1",
