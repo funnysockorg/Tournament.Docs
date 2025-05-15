@@ -16,3 +16,19 @@ stateDiagram-v2
   Прошел_турнир --> Общие_результаты: отправить результаты
   Общие_результаты --> [*]
 ```
+
+```mermaid
+stateDiagram-v2
+  [*] --> CodeExchangeInProgress: exchange code
+  CodeExchangeInProgress --> CodeExchangeError: failed
+  CodeExchangeError --> CodeExchangeInProgress: try again
+  CodeExchangeInProgress --> [*]: success
+```
+
+```mermaid
+stateDiagram-v2
+  [*] --> GettingUserDataInProgress: get
+  GettingUserDataInProgress --> GettingUserDataError: failed
+  GettingUserDataError --> GettingUserDataInProgress: try again
+  GettingUserDataInProgress --> [*]: success
+```
